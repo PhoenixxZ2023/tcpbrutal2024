@@ -78,7 +78,7 @@ dkms_remove_modules() {
 dkms_build_and_install_modules() {
     local module_name=$1
     local module_version=$2
-    dkms add -m "${module_name}" -v "${module_version}"
+    dkms add "${module_name}/${module_version}"
     dkms build "${module_name}/${module_version}"
     dkms install --force "${module_name}/${module_version}"
 }
