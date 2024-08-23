@@ -9,9 +9,9 @@
 
 set -e
 
-# Define o nome do módulo
+# Defina o nome e a versão do módulo
 DKMS_MODULE_NAME="tcp_brutal"
-KERNEL_MODULE_NAME="tcp_brutal"
+DKMS_MODULE_VERSION="1.0"
 
 # Função para exibir o menu
 menu() {
@@ -47,7 +47,7 @@ remove_tcp_brutal() {
 # Função para desativar TCP-Brutal
 deactivate_tcp_brutal() {
   echo "Desativando o TCP-Brutal..."
-  kmod_unload_if_loaded "$KERNEL_MODULE_NAME"
+  kmod_unload_if_loaded "$DKMS_MODULE_NAME"
   echo "TCP-Brutal desativado!"
   sleep 2
 }
@@ -62,7 +62,7 @@ restart_server() {
 # Funções originais do script
 perform_install() {
     dkms_remove_modules "$DKMS_MODULE_NAME"
-    dkms_build_and_install_modules "$DKMS_MODULE_NAME"
+    dkms_build_and_install_modules "$DKMS_MODULE_NAME" "$DKMS_MODULE_VERSION"
     dkms_sign_modules "$KERNEL_MODULE_NAME"
     kmod_load_module "$KERNEL_MODULE_NAME"
 }
@@ -77,9 +77,10 @@ dkms_remove_modules() {
 
 dkms_build_and_install_modules() {
     local module_name=$1
-    dkms add .
-    dkms build "${module_name}"
-    dkms install --force "${module_name}"
+    local module_version=$2
+    dkms add -m "${module_name}" -v "${module_version}"
+    dkms build "${module_name}/${module_version}"
+    dkms install --force "${module_name}/${module_version}"
 }
 
 dkms_sign_modules() {
