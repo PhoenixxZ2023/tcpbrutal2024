@@ -12,6 +12,7 @@ set -e
 # Defina o nome e a versão do módulo
 DKMS_MODULE_NAME="tcp_brutal"
 DKMS_MODULE_VERSION="1.0"
+MODULE_SOURCE_DIR="/usr/src/${DKMS_MODULE_NAME}-${DKMS_MODULE_VERSION}"
 
 # Função para exibir o menu
 menu() {
@@ -31,6 +32,17 @@ menu() {
 # Função para instalar TCP-Brutal
 install_tcp_brutal() {
   echo "Iniciando a instalação do TCP-Brutal..."
+  
+  if ! command -v dkms &>/dev/null; then
+      echo "O comando 'dkms' não está instalado. Por favor, instale o DKMS."
+      exit 1
+  fi
+
+  if [ ! -d "${MODULE_SOURCE_DIR}" ]; then
+      echo "O diretório do código-fonte ${MODULE_SOURCE_DIR} não foi encontrado."
+      exit 1
+  fi
+
   perform_install
   echo "Instalação concluída!"
   sleep 2
@@ -63,8 +75,8 @@ restart_server() {
 perform_install() {
     dkms_remove_modules "$DKMS_MODULE_NAME"
     dkms_build_and_install_modules "$DKMS_MODULE_NAME" "$DKMS_MODULE_VERSION"
-    dkms_sign_modules "$KERNEL_MODULE_NAME"
-    kmod_load_module "$KERNEL_MODULE_NAME"
+    dkms_sign_modules "$DKMS_MODULE_NAME"
+    kmod_load_module "$DKMS_MODULE_NAME"
 }
 
 dkms_remove_modules() {
@@ -109,7 +121,7 @@ kmod_unload_if_loaded() {
 # Loop principal do menu
 while true; do
   menu
-  read option
+  read -r option
   case $option in
     1)
       install_tcp_brutal
